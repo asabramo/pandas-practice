@@ -66,10 +66,24 @@ def write_html(country):
     f = open('{0}.html'.format(country), 'w')
     header = '''<html>
     <header> <title> This is title </title> </header>
+    <style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    img {
+        padding: 0;
+        display: block;
+        margin: 0 auto;
+        max-height: 30%;
+        max-width: 100%;
+    }
+    </style>
     <body>
-    Hello!
+    Here are some charts I made by myself.
     '''
-    str = '<img src="abs_{0}.png" alt="absolute">\n'.format(country)
+    str = '<img src="abs_{0}.png" alt="absolute" >\n'.format(country)
     str += '<img src="vel_{0}.png" alt="velocity">\n'.format(country)
     str += '<img src="acc_{0}.png" alt="acceleration">\n'.format(country)
     footer = '''
