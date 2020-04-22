@@ -65,27 +65,52 @@ def chart_country_data(df, country, title, filename=None):
 def write_html(country):
     f = open('{0}.html'.format(country), 'w')
     header = '''<html>
-    <header> <title> This is title </title> </header>
+    <header> <title> Charts from Pandas </title> </header>
     <style>
-    html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-    }
-    img {
-        padding: 0;
-        display: block;
-        margin: 0 auto;
-        max-height: 30%;
-        max-width: 100%;
+    .row {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 4px;
+}
+
+/* Create four equal columns that sits next to each other */
+.column {
+  flex: 40%;
+  max-width: 40%;
+  padding: 0 4px;
+}
+
+.column img {
+  margin-top: 8px;
+  vertical-align: middle;
+  width: 100%;
+}
+
+/* Responsive layout - makes a two column-layout instead of four columns */
+@media screen and (max-width: 800px) {
+  .column {
+    flex: 40%;
+    max-width: 40%;
+  }
+}
+
+/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 600px) {
+  .column {
+    flex: 100%;
+    max-width: 100%;
+  }
+}
     }
     </style>
     <body>
     Here are some charts I made by myself.
     '''
-    str = '<img src="abs_{0}.png" alt="absolute" >\n'.format(country)
-    str += '<img src="vel_{0}.png" alt="velocity">\n'.format(country)
-    str += '<img src="acc_{0}.png" alt="acceleration">\n'.format(country)
+    str = ''
+    str += '<div class="row"<div class="column"><img src="abs_{0}.png" alt="absolute"></div></div>\n'.format(
+        country)
+    str += '<div class="row"><div class="column"><img src="vel_{0}.png" alt="velocity"></div>\n'.format(country)
+    str += '<div class="column"><img src="acc_{0}.png" alt="acceleration"></div></div>\n'.format(country)
     footer = '''
     </body>
     </html>
