@@ -1,12 +1,13 @@
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import matplotlib.dates as mdates
 
 def load_data():
     #Data taken from: https://github.com/CSSEGISandData/COVID-19.git
     df = pd.read_csv("../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
     df = df.rename(columns={'Country/Region': 'country'})
+    df.columns = df.columns[:4].to_list() + pd.to_datetime(df.columns[4:]).to_list()
     return df
 
 
@@ -40,15 +41,43 @@ def create_deltas_dataframe(df):
     return deltas_df
 
 
-def chart_country_data(df, country, title):
+def chart_country_data(df, country, title, filename=None):
     row = filter_by_country(country, df)
     row = keep_only_data_columns(row)
     print(row)
-    row_data = row
-    row_data.plot(kind='bar')
-    plt.title(title)
-    plt.show()
+    row_data = row.T
+    # set ggplot style
+    # plt.style.use('ggplot')
+    fig, ax = plt.subplots(figsize=(15,7))
+    ax.set_title(title)
+    ax.set_ylabel('Count')
+    ax.set_xlabel('Date')
+    # set ticks every week
+    ax.xaxis.set_major_locator(mdates.WeekdayLocator())
+    # # # # format date
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %d'))
+    ax.bar(row_data.index, row_data.iloc[:, 0])
+    if (filename is None):
+        plt.show()
+    else:
+        plt.savefig(filename)
 
+def write_html(country):
+    f = open('{0}.html'.format(country), 'w')
+    header = '''<html>
+    <header> <title> This is title </title> </header>
+    <body>
+    Hello!
+    '''
+    str = '<img src="abs_{0}.png" alt="absolute">\n'.format(country)
+    str += '<img src="vel_{0}.png" alt="velocity">\n'.format(country)
+    str += '<img src="acc_{0}.png" alt="acceleration">\n'.format(country)
+    footer = '''
+    </body>
+    </html>
+    '''
+    f.write(header + str + footer)
+    f.close()
 
 if __name__ == '__main__':
     test_deltas = 0
@@ -74,19 +103,22 @@ if __name__ == '__main__':
     if (len(sys.argv) >= 2):
         country = sys.argv[1]
 
-    chart_type = "abs"
+    chart_type = None
     if (len(sys.argv) >= 3):
         chart_type = sys.argv[2]
 
-    if (chart_type == "abs"):
+    if (chart_type is None or chart_type == "abs"):
+        title = 'Total infected COVID-19 over time in {0}'.format(country)
         # Graph the absolute numbers:
-        chart_country_data(df, country, 'Total infected COVID-19 over time in {0}'.format(country))
+        chart_country_data(df, country, title, 'abs_{0}'.format(country))
         #title += '\nAverage infected per day in {0} is {1} '.format(country, speed)
-    elif (chart_type == "vel"):
+    if (chart_type is None or chart_type == "vel"):
+        title = 'Velocity: Infection rate over time of COVID-19 in {0}'.format(country)
         # Graph the velocity:
-        chart_country_data(velocity_df, country, 'Velocity: Infection rate over time of COVID-19 in {0}'.format(country))
-    elif (chart_type == "acc"):
+        chart_country_data(velocity_df, country, title, 'vel_{0}'.format(country))
+    if (chart_type is None or chart_type == "acc"):
+        title = 'Acceleration: Change in infection rate over time of COVID-19 in {0}'.format(country)
         # Graph the accelaration:
-        chart_country_data(accelaration_df, country, 'Acceleration: Change in infection rate over time of COVID-19 in {0}'.format(country))
-
+        chart_country_data(accelaration_df, country, title, 'acc_{0}'.format(country))
+    write_html(country)
     print("DONE :-)")
